@@ -26,13 +26,13 @@ if (
 const app = express();
 
 app.use(cors({ credentials: true, origin: true }));
-app.use(bodyParser.json({ type: 'application/json' }));
 
 app.all('/api/sync/*', async function (req, res) {
   const url = `${COUCH_DB_HOST}${req.url.replace('/api/sync', '')}`;
   req.pipe(request(url)).pipe(res);
 });
 
+app.use(bodyParser.json({ type: 'application/json' }));
 app.use(authRouter);
 
 const port = process.env.port || 3333;
