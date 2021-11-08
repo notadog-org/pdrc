@@ -10,7 +10,6 @@ export const router = express.Router();
 router.post('/api/auth/register', async (req, res, next) => {
   try {
     const { username, password } = req.body;
-
     const { data } = await axios.put(
       `${COUCH_DB_ROOT_HOST}/_users/org.couchdb.user:${req.body.username}`,
       {
@@ -21,7 +20,6 @@ router.post('/api/auth/register', async (req, res, next) => {
       },
       {}
     );
-
     const token = jwt.sign(
       { sub: username },
       Buffer.from(JWT_SECRET, 'base64')
@@ -36,11 +34,9 @@ router.post('/api/auth/register', async (req, res, next) => {
 router.post('/api/auth/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
-
     const { data } = await axios.get(`${COUCH_DB_HOST}/_session`, {
       headers: { Authorization: `Basic ${btoa(`${username}:${password}`)}` },
     });
-
     const token = jwt.sign(
       { sub: username },
       Buffer.from(JWT_SECRET, 'base64')
