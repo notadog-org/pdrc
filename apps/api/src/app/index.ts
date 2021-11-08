@@ -4,23 +4,17 @@ import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import * as jwt from 'jsonwebtoken';
 
-import {
-  COUCH_DB_HOST,
-  COUCH_DB_USER,
-  COUCH_DB_PASSWORD,
-  COUCH_DB_ROOT_HOST,
-  JWT_SECRET,
-} from '../env';
+import { environment } from '../environments/environment';
 
 import { hexEncode } from './utils';
 import { authRouter } from './routes';
 
 if (
   [
-    COUCH_DB_HOST,
-    COUCH_DB_USER,
-    COUCH_DB_PASSWORD,
-    COUCH_DB_ROOT_HOST,
+    environment.couchDbHost,
+    environment.couchDbUser,
+    environment.couchDbPassword,
+    environment.couchDbRootHost,
   ].includes(undefined)
 ) {
   throw new Error('no database connection');
@@ -34,12 +28,11 @@ export const App = function () {
   app.all('/api/sync/*', function (req, res) {
     const { sub } = jwt.verify(
       req.headers.authorization.replace('Bearer ', ''),
-      Buffer.from(JWT_SECRET, 'base64')
+      Buffer.from(environment.jwtSecret, 'base64')
     );
-    const url = `${COUCH_DB_HOST}/userdb-${hexEncode(sub)}/${req.url.replace(
-      '/api/sync',
-      ''
-    )}`;
+    const url = `${environment.couchDbHost}/userdb-${hexEncode(
+      sub
+    )}/${req.url.replace('/api/sync', '')}`;
 
     req.pipe(request(url)).pipe(res);
   });

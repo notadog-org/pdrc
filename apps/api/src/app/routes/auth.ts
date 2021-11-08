@@ -3,7 +3,7 @@ import * as jwt from 'jsonwebtoken';
 import * as btoa from 'btoa';
 import axios from 'axios';
 
-import { JWT_SECRET, COUCH_DB_ROOT_HOST, COUCH_DB_HOST } from '../../env';
+import { environment } from '../../environments/environment';
 
 export const router = express.Router();
 
@@ -11,7 +11,7 @@ router.post('/api/auth/register', async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const { data } = await axios.put(
-      `${COUCH_DB_ROOT_HOST}/_users/org.couchdb.user:${req.body.username}`,
+      `${environment.couchDbRootHost}/_users/org.couchdb.user:${req.body.username}`,
       {
         name: username,
         password,
@@ -22,7 +22,7 @@ router.post('/api/auth/register', async (req, res, next) => {
     );
     const token = jwt.sign(
       { sub: username },
-      Buffer.from(JWT_SECRET, 'base64')
+      Buffer.from(environment.jwtSecret, 'base64')
     );
 
     return res.json({ token: `Bearer ${token}`, ...data });
@@ -34,12 +34,12 @@ router.post('/api/auth/register', async (req, res, next) => {
 router.post('/api/auth/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    const { data } = await axios.get(`${COUCH_DB_HOST}/_session`, {
+    const { data } = await axios.get(`${environment.couchDbHost}/_session`, {
       headers: { Authorization: `Basic ${btoa(`${username}:${password}`)}` },
     });
     const token = jwt.sign(
       { sub: username },
-      Buffer.from(JWT_SECRET, 'base64')
+      Buffer.from(environment.jwtSecret, 'base64')
     );
 
     return res.json({ token: `Bearer ${token}`, ...data });
