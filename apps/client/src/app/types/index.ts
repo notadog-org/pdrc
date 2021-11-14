@@ -18,6 +18,7 @@ export interface UserResponse {
 export interface Change {
   id: string;
   deleted: boolean;
+  error?: string;
   doc: Doc;
 }
 export class Doc {

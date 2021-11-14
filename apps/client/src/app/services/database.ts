@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import PouchDB from 'pouchdb';
 import { BehaviorSubject, from, Observable, Subject } from 'rxjs';
-import { filter, map, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import { map, takeUntil, withLatestFrom } from 'rxjs/operators';
 
 import { JWT_TOKEN_KEY } from '../../const';
 import { environment } from '../../environments/environment';
@@ -59,20 +59,21 @@ export class DatabaseService {
           return;
         }
 
-        const docIndex = data.findIndex((doc) => doc?._id === change.id);
+        const { id, deleted, doc: newDoc } = change;
+        const docIndex = data.findIndex((doc) => doc?._id === id);
         const doc = data[docIndex];
 
         switch (true) {
-          case doc === undefined && change.deleted:
+          case doc === undefined && deleted:
             break;
-          case doc !== undefined && change.deleted:
+          case doc !== undefined && deleted:
             data.splice(docIndex, 1);
             break;
           case doc !== undefined:
-            data[docIndex] = change.doc;
+            data[docIndex] = newDoc;
             break;
           default:
-            data.push(change.doc);
+            data.push(newDoc);
         }
 
         this.data$.next(data);
@@ -100,17 +101,24 @@ export class DatabaseService {
     const token = localStorage.getItem(JWT_TOKEN_KEY);
     const url = `${environment.apiHost}/api/sync`;
 
-    this.db.sync(url, {
-      headers: { Authorization: token },
-      live: true,
-      retry: true,
-      continuous: true,
-      back_off_function: (delay: number) => {
-        if (delay === 0) {
-          return 1000;
+    this.db
+      .sync(url, {
+        headers: { Authorization: token },
+        live: true,
+        retry: true,
+        continuous: true,
+        back_off_function: (delay: number) => {
+          if (delay === 0) {
+            return 1000;
+          }
+          return delay * 3;
+        },
+      })
+      .on('denied', ({ doc }: { doc: Change }) => {
+        if (!doc.error) {
+          return;
         }
-        return delay * 3;
-      },
-    });
+        this.invalidate();
+      });
   }
 }
