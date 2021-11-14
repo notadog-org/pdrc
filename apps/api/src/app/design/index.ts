@@ -1,13 +1,13 @@
-const validate_doc_update = function (newDoc, oldDoc, userCtx) {
-  function require(field, message) {
+export const validate_doc_update = function (newDoc, oldDoc, userCtx) {
+  function require(field, message?) {
     message = message || 'Document must have a ' + field;
-    if (!newDoc[field]) throw { forbidden: message };
+    if (newDoc[field] === undefined) throw { forbidden: message };
   }
 
-  function notEmpty(field, message) {
+  function notEmpty(field, message?) {
     require(field, message);
 
-    message = message || field + 'cannot be empty';
+    message = message || field + ' cannot be empty';
     if (!newDoc[field].length) throw { forbidden: message };
   }
 
@@ -17,7 +17,10 @@ const validate_doc_update = function (newDoc, oldDoc, userCtx) {
 
   if (newDoc.type === 'order') {
     notEmpty('title');
+    return;
   }
+
+  throw { forbidden: 'Unknown data' };
 };
 
 export const validation = {
