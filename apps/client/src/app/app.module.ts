@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
+import { DatabaseService } from './services/database';
 import { OrderService } from './services/orders';
 import { AuthService } from './services/auth';
 
@@ -16,7 +17,7 @@ import { AuthService } from './services/auth';
     HttpClientModule,
     FormsModule,
   ],
-  providers: [OrderService, AuthService],
+  providers: [OrderService, AuthService, DatabaseService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

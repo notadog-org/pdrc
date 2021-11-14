@@ -1,91 +1,36 @@
 import { Injectable } from '@angular/core';
-import PouchDB from 'pouchdb';
-import { JWT_TOKEN_KEY } from '../../const';
-import { environment } from '../../environments/environment';
-import { Order } from '../types';
+
+import { DatabaseService } from './database';
+import { Doc, Order } from '../types';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class OrderService {
-  data: Order[] = [];
-  db: any;
+  constructor(private readonly database: DatabaseService) {}
 
-  constructor() {
-    this.db = new PouchDB('orders');
-    this.sync();
-  }
-
-  sync() {
-    const token = localStorage.getItem(JWT_TOKEN_KEY);
-    const url = `${environment.apiHost}/api/sync`;
-    this.db.sync(url, {
-      headers: { Authorization: token },
-      live: true,
-      retry: true,
-      continuous: true,
-      back_off_function: (delay: number) => {
-        if (delay === 0) {
-          return 1000;
+  getOrders() {
+    return this.database.getAll().pipe(
+      map((data: Doc[] | null) => {
+        if (data === null) {
+          return data;
         }
-        return delay * 3;
-      },
-    });
-  }
 
-  getAll(): Promise<Order[]> {
-    if (this.data.length > 0) {
-      return Promise.resolve(this.data);
-    }
-
-    return new Promise((resolve) => {
-      this.db
-        .allDocs({ include_docs: true })
-        .then((result: any) => {
-          this.data = [];
-          result.rows.forEach((row: any) => {
-            this.data = [...this.data, row.doc];
-          });
-          resolve(this.data);
-          this.db
-            .changes({ live: true, since: 'now', include_docs: true })
-            .on('change', (change: Order) => {
-              this.handleChange(change);
-            });
-        })
-        .catch((err: any) => {
-          console.log(err);
-        });
-    });
-  }
-
-  handleChange(change: any) {
-    const docIndex = this.data.findIndex((doc) => doc?._id === change.id);
-    const doc = this.data[docIndex];
-
-    switch (true) {
-      case doc !== undefined && change.deleted:
-        this.data.splice(docIndex, 1);
-        break;
-      case doc !== undefined:
-        this.data[docIndex] = change.doc;
-        break;
-      default:
-        this.data.push(change.doc);
-    }
+        return data
+          .filter((doc) => doc.type === 'order')
+          .map((doc) => new Order(doc));
+      })
+    );
   }
 
   createOrder(order: Order) {
-    this.db.post(order).catch((err: any) => {
-      console.log(err);
-    });
+    return this.database.createOne({ ...order, type: 'order' });
   }
+
   updateOrder(order: Order) {
-    this.db.put(order).catch((err: any) => {
-      console.log(err);
-    });
+    return this.database.updateOne(order);
   }
+
   deleteOrder(order: Order) {
-    this.db.remove(order).catch((err: any) => {
-      console.log(err);
-    });
+    return this.database.deleteOne(order);
   }
 }

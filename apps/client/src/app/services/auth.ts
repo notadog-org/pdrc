@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { JWT_TOKEN_KEY } from '../../const';
 
 import { environment } from '../../environments/environment';
 import { UserResponse, UserLoginRequest, UserRegisterRequest } from '../types';
@@ -30,5 +31,9 @@ export class AuthService {
         password,
       }
     );
+  }
+
+  logout() {
+    return of(localStorage.removeItem(JWT_TOKEN_KEY));
   }
 }

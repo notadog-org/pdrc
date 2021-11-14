@@ -18,6 +18,7 @@
 <div>
   <button (click)="register()">Register</button>
   <button (click)="login()">Login</button>
+  <button (click)="logout()">Logout</button>
 </div>
 
 <div>
@@ -26,7 +27,7 @@
 <div>
   <button (click)="createOrder()">Add Order</button>
 </div>
-<ul *ngFor="let order of orders">
+<ul *ngFor="let order of orders$ | async">
   <li>
     <div>{{ order.title }}</div>
     <button (click)="updateOrder(order)">update</button>
