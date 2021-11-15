@@ -3,8 +3,8 @@ import * as request from 'request';
 import * as bodyParser from 'body-parser';
 import axios from 'axios';
 
-import { environment } from '../../environments/environment';
-import { hexEncode, verifyJwt } from '../utils';
+import { environment } from '../../../environments/environment';
+import { hexEncode, verifyJwt } from '../../utils';
 
 export const router = express.Router();
 

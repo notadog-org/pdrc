@@ -2,9 +2,9 @@ import * as express from 'express';
 import * as btoa from 'btoa';
 import axios from 'axios';
 
-import { environment } from '../../environments/environment';
-import { hexEncode, signJwt, sleep } from '../utils';
-import { validation } from '../design';
+import { environment } from '../../../environments/environment';
+import { hexEncode, signJwt, sleep } from '../../utils';
+import { validation } from '../../design';
 
 export const router = express.Router();
 
