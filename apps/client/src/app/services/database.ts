@@ -1,22 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import PouchDB from 'pouchdb';
 import { BehaviorSubject, from, Observable, Subject } from 'rxjs';
 import { map, takeUntil, withLatestFrom } from 'rxjs/operators';
 
 import { JWT_TOKEN_KEY } from '../../const';
-import { environment } from '../../environments/environment';
 import { Change, Doc } from '../types';
 
 @Injectable()
 export class DatabaseService {
   private destroy$ = new Subject();
 
+  private syncUrl = `${this.document.location.protocol}//${this.document.location.host}/api/sync`;
   private db: any;
   private change$ = new BehaviorSubject<Change | null>(null);
 
   data$ = new BehaviorSubject<Doc[] | null>(null);
 
-  constructor() {
+  constructor(@Inject(DOCUMENT) private readonly document: Document) {
     this.init();
   }
 
@@ -99,10 +100,9 @@ export class DatabaseService {
 
   private sync() {
     const token = localStorage.getItem(JWT_TOKEN_KEY);
-    const url = `${environment.apiHost}/api/sync`;
 
     this.db
-      .sync(url, {
+      .sync(this.syncUrl, {
         headers: { Authorization: token },
         live: true,
         retry: true,

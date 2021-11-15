@@ -3,10 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx serve",
+    "start": "node dist/apps/api/main",
+    "serve": "nx serve",
     "build": "nx build",
     "test": "nx test",
-    "postinstall": "ngcc --properties es2015 browser module main"
+    "affected:build": "nx affected:build --with-deps",
+    "affected:test": "nx affected:test",
+    "postinstall": "ngcc --properties es2015 browser module main",
+    "heroku-postbuild": "nx build --prod && nx build --prod client"
   },
   "private": true,
   "dependencies": {
@@ -51,7 +55,7 @@
     "@types/cors": "^2.8.12",
     "@types/express": "4.17.0",
     "@types/jest": "27.0.2",
-    "@types/node": "14.14.33",
+    "@types/node": "^14.14.33",
     "@types/pouchdb": "^6.4.0",
     "@types/request": "^2.48.7",
     "@typescript-eslint/eslint-plugin": "~4.33.0",
