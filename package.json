@@ -3,10 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx serve",
+    "start": "node dist/apps/api/main",
+    "serve": "nx serve",
     "build": "nx build",
     "test": "nx test",
-    "postinstall": "ngcc --properties es2015 browser module main"
+    "affected:build": "nx affected:build --with-deps",
+    "affected:test": "nx affected:test",
+    "postinstall": "ngcc --properties es2015 browser module main",
+    "heroku-postbuild": "nx build --prod && nx build --prod client"
   },
   "private": true,
   "dependencies": {
