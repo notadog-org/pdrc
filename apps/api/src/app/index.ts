@@ -18,7 +18,7 @@ if (
 }
 
 export const App = function () {
-  const port = process.env.port || 3333;
+  const port = process.env.PORT || 3333;
   const app = express();
 
   app.use(cors({ credentials: true, origin: true }));
