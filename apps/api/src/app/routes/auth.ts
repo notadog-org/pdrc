@@ -10,6 +10,10 @@ export const router = express.Router();
 
 router.post('/api/auth/register', async (req, res, next) => {
   try {
+    if (environment.enableRegistration !== 'true') {
+      throw new Error('Registration disabled');
+    }
+
     const { username, password } = req.body;
     const { data } = await axios.put(
       `${environment.couchDbRootHost}/_users/org.couchdb.user:${username}`,
