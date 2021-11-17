@@ -7,7 +7,7 @@ const {
 } = process.env;
 
 export const environment = {
-  production: false,
+  production: true,
   jwtSecret: NX_JWT_SECRET,
   couchDbProtocol: NX_COUCH_DB_PROTOCOL,
   couchDbUser: NX_COUCH_DB_USER,

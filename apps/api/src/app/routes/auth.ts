@@ -2,9 +2,9 @@ import * as express from 'express';
 import * as btoa from 'btoa';
 import axios from 'axios';
 
-import { environment } from '../../../environments/environment';
-import { hexEncode, signJwt } from '../../utils';
-import { validation } from '../../design';
+import { environment } from '../../environments/environment';
+import { hexEncode, signJwt, sleep } from '../utils';
+import { validation } from '../design';
 
 export const router = express.Router();
 
@@ -22,10 +22,9 @@ router.post('/api/auth/register', async (req, res, next) => {
       }
     );
 
-    await axios.put(
-      `${environment.couchDbRootHost}/userdb-${hexEncode(username)}`,
-      JSON.stringify(validation)
-    );
+    //TODO(klikkn): refactor
+    //it allows couch db to create a user db
+    await sleep(500);
 
     await axios.put(
       `${environment.couchDbRootHost}/userdb-${hexEncode(username)}/${
