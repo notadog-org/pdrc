@@ -6,17 +6,6 @@ import * as bodyParser from 'body-parser';
 import { environment } from '../environments/environment';
 import { authRouter, syncRouter } from './routes';
 
-if (
-  [
-    environment.couchDbHost,
-    environment.couchDbUser,
-    environment.couchDbPassword,
-    environment.couchDbRootHost,
-  ].includes(undefined)
-) {
-  throw new Error('no database connection');
-}
-
 export const App = function () {
   const port = process.env.PORT || 3333;
   const app = express();

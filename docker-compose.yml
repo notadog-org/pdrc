@@ -10,8 +10,7 @@ services:
       - '4369:4369'
       - '9100:9100'
     volumes:
-      - ./.docker/couchdb_data:/bitnami/couchdb
-      - ./.docker/couchdb_data/10-custom.ini:/opt/bitnami/couchdb/etc/local.d/10-custom.ini
+      - ./.docker/couchdb/etc/local.d:/opt/bitnami/couchdb/etc/local.d
 volumes:
   couchdb_data:
     driver: local

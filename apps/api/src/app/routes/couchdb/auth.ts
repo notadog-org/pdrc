@@ -43,7 +43,7 @@ router.post('/api/auth/register', async (req, res, next) => {
 router.post('/api/auth/login', async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    const { data } = await axios.get(`${environment.couchDbHost}/_session`, {
+    const { data } = await axios.get(`${environment.couchDbUrl}/_session`, {
       headers: { Authorization: `Basic ${btoa(`${username}:${password}`)}` },
     });
     const token = signJwt({ username });
