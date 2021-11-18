@@ -9,7 +9,7 @@ import { hexEncode, verifyJwt } from '../utils';
 export const router = express.Router();
 
 const toUserDbUrl = (url, username) =>
-  `${environment.couchDbHost}/userdb-${hexEncode(username)}/${url.replace(
+  `${environment.couchDbUrl}/userdb-${hexEncode(username)}/${url.replace(
     '/api/sync',
     ''
   )}`;
