@@ -62,19 +62,26 @@ export const validate_doc_update = function (newDoc, oldDoc, userCtx) {
   }
 
   if (newDoc.type === 'order') {
-    [CATEGORY_FIELD, DATE_FIELD, ITEMS_FIELD].forEach((field) =>
-      isRequired(newDoc, field)
-    );
-    [DATE_FIELD].forEach((field) => isDate(newDoc, field));
-    [ITEMS_FIELD].forEach((field) => isArray(newDoc, field));
+    [CATEGORY_FIELD, DATE_FIELD, ITEMS_FIELD].forEach(function (field) {
+      isRequired(newDoc, field, undefined);
+    });
+
+    [DATE_FIELD].forEach(function (field) {
+      isDate(newDoc, field, undefined);
+    });
+    [ITEMS_FIELD].forEach(function (field) {
+      isArray(newDoc, field, undefined);
+    });
     [
       CAR_MODEL_FIELD,
       CAR_PRODUCER_FIELD,
       CLIENT_NAME_FIELD,
       CLIENT_PHONE_FIELD,
-    ].forEach((field) => notEmpty(newDoc, field));
+    ].forEach(function (field) {
+      notEmpty(newDoc, field, undefined);
+    });
 
-    newDoc.items.forEach((item) => {
+    newDoc.items.forEach(function (item) {
       [
         ORDER_ITEM_CAR_CLASS_FIELD,
         ORDER_ITEM_COUNT_FIELD,
@@ -82,13 +89,15 @@ export const validate_doc_update = function (newDoc, oldDoc, userCtx) {
         ORDER_ITEM_SIZE_FIELD,
         ORDER_ITEM_TABLE_FIELD,
         ORDER_ITEM_PRICE_FIELD,
-      ].forEach((field) =>
-        isRequired(item, field, `item field ${field} should be defined`)
-      );
+      ].forEach(function (field) {
+        isRequired(item, field, 'item field' + field + 'should be defined');
+      });
 
-      [ORDER_ITEM_COUNT_FIELD, ORDER_ITEM_PRICE_FIELD].forEach((field) =>
-        isNumber(item, field, `item field ${field} should be a number`)
-      );
+      [ORDER_ITEM_COUNT_FIELD, ORDER_ITEM_PRICE_FIELD].forEach(function (
+        field
+      ) {
+        isNumber(item, field, 'item field' + field + 'should be defined');
+      });
     });
 
     return true;
