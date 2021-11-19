@@ -90,13 +90,13 @@ export const validate_doc_update = function (newDoc, oldDoc, userCtx) {
         ORDER_ITEM_TABLE_FIELD,
         ORDER_ITEM_PRICE_FIELD,
       ].forEach(function (field) {
-        isRequired(item, field, 'item field' + field + 'should be defined');
+        isRequired(item, field, 'item field ' + field + ' should be defined');
       });
 
       [ORDER_ITEM_COUNT_FIELD, ORDER_ITEM_PRICE_FIELD].forEach(function (
         field
       ) {
-        isNumber(item, field, 'item field' + field + 'should be defined');
+        isNumber(item, field, 'item field ' + field + ' should be a number');
       });
     });
 
