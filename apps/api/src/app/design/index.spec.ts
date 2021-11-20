@@ -2,14 +2,14 @@ import { fail } from 'assert';
 import { validate_doc_update } from './index';
 
 // fields
-const CATEGORY_FIELD = 'category';
-const DATE_FIELD = 'date';
-const ITEMS_FIELD = 'items';
+const ORDER_CATEGORY_FIELD = 'category';
+const ORDER_DATE_FIELD = 'date';
+const ORDER_ITEMS_FIELD = 'items';
 
-const CAR_MODEL_FIELD = 'carModel';
-const CAR_PRODUCER_FIELD = 'carProducer';
-const CLIENT_NAME_FIELD = 'clientName';
-const CLIENT_PHONE_FIELD = 'clientPhone';
+const ORDER_CAR_MODEL_FIELD = 'carModel';
+const ORDER_CAR_PRODUCER_FIELD = 'carProducer';
+const ORDER_CLIENT_NAME_FIELD = 'clientName';
+const ORDER_CLIENT_PHONE_FIELD = 'clientPhone';
 
 const ORDER_ITEM_CAR_CLASS_FIELD = 'carClass';
 const ORDER_ITEM_COUNT_FIELD = 'count';
@@ -17,12 +17,6 @@ const ORDER_ITEM_PART_FIELD = 'part';
 const ORDER_ITEM_SIZE_FIELD = 'size';
 const ORDER_ITEM_TABLE_FIELD = 'table';
 const ORDER_ITEM_PRICE_FIELD = 'price';
-
-// values
-const CATEGORY_VALID_VALUES = [];
-const CAR_CLASS_VALID_VALUES = [];
-const PART_VALID_VALUES = [];
-const SIZE_VALID_VALUES = [];
 
 describe('Base validation', () => {
   describe('order', () => {
@@ -58,7 +52,7 @@ describe('Base validation', () => {
       expect(validate_doc_update(newDoc, {}, {})).toBeTruthy();
     });
 
-    test.each([CATEGORY_FIELD, DATE_FIELD, ITEMS_FIELD])(
+    test.each([ORDER_CATEGORY_FIELD, ORDER_DATE_FIELD, ORDER_ITEMS_FIELD])(
       'error if %s field is not defined',
       async (key) => {
         const doc = { ...newDoc };
@@ -75,21 +69,24 @@ describe('Base validation', () => {
       }
     );
 
-    test.each([DATE_FIELD])('error if %s field is not a date', async (key) => {
-      const doc = { ...newDoc };
-      doc[key] = 1;
+    test.each([ORDER_DATE_FIELD])(
+      'error if %s field is not a date',
+      async (key) => {
+        const doc = { ...newDoc };
+        doc[key] = 1;
 
-      try {
-        validate_doc_update(doc, {}, {});
-        fail();
-      } catch (error) {
-        expect(error).toEqual({
-          forbidden: `${key} should be a date`,
-        });
+        try {
+          validate_doc_update(doc, {}, {});
+          fail();
+        } catch (error) {
+          expect(error).toEqual({
+            forbidden: `${key} should be a date`,
+          });
+        }
       }
-    });
+    );
 
-    test.each([ITEMS_FIELD])(
+    test.each([ORDER_ITEMS_FIELD])(
       'error if %s field is not an array',
       async (key) => {
         const doc = { ...newDoc };
@@ -107,10 +104,10 @@ describe('Base validation', () => {
     );
 
     test.each([
-      CAR_MODEL_FIELD,
-      CAR_PRODUCER_FIELD,
-      CLIENT_NAME_FIELD,
-      CLIENT_PHONE_FIELD,
+      ORDER_CAR_MODEL_FIELD,
+      ORDER_CAR_PRODUCER_FIELD,
+      ORDER_CLIENT_NAME_FIELD,
+      ORDER_CLIENT_PHONE_FIELD,
     ])('error if %s field is defined, but is empty', async (key) => {
       const doc = { ...newDoc };
       doc[key] = '';
