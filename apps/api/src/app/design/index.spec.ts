@@ -1,7 +1,9 @@
 import { fail } from 'assert';
-import { validate_doc_update } from './index';
+import { validate_doc_update, params } from './index';
 
 // fields
+const SETTINGS_PRICES_FIELD = 'prices';
+
 const ORDER_CAR_CLASS_FIELD = 'carClass';
 const ORDER_DATE_FIELD = 'date';
 const ORDER_ITEMS_FIELD = 'items';
@@ -19,7 +21,7 @@ const ORDER_ITEM_PRICE_FIELD = 'price';
 
 describe('Base validation', () => {
   describe('order', () => {
-    const newDoc = {
+    const NEW_DOC = {
       type: 'order',
       carClass: 'C',
       carModel: 'A5',
@@ -45,6 +47,15 @@ describe('Base validation', () => {
       ],
     };
 
+    let newDoc;
+
+    beforeEach(() => {
+      newDoc = {
+        ...NEW_DOC,
+        items: [{ ...NEW_DOC.items[0] }, { ...NEW_DOC.items[0] }],
+      };
+    });
+
     test('is valid', () => {
       expect(validate_doc_update(newDoc, {}, {})).toBeTruthy();
     });
@@ -52,11 +63,10 @@ describe('Base validation', () => {
     test.each([ORDER_CAR_CLASS_FIELD, ORDER_DATE_FIELD, ORDER_ITEMS_FIELD])(
       'error if %s field is not defined',
       async (key) => {
-        const doc = { ...newDoc };
-        delete doc[key];
+        delete newDoc[key];
 
         try {
-          validate_doc_update(doc, {}, {});
+          validate_doc_update(newDoc, {}, {});
           fail();
         } catch (error) {
           expect(error).toEqual({
@@ -69,11 +79,10 @@ describe('Base validation', () => {
     test.each([ORDER_DATE_FIELD])(
       'error if %s field is not a date',
       async (key) => {
-        const doc = { ...newDoc };
-        doc[key] = 1;
+        newDoc[key] = 1;
 
         try {
-          validate_doc_update(doc, {}, {});
+          validate_doc_update(newDoc, {}, {});
           fail();
         } catch (error) {
           expect(error).toEqual({
@@ -86,11 +95,10 @@ describe('Base validation', () => {
     test.each([ORDER_ITEMS_FIELD])(
       'error if %s field is not an array',
       async (key) => {
-        const doc = { ...newDoc };
-        doc[key] = 1;
+        newDoc[key] = 1;
 
         try {
-          validate_doc_update(doc, {}, {});
+          validate_doc_update(newDoc, {}, {});
           fail();
         } catch (error) {
           expect(error).toEqual({
@@ -106,11 +114,10 @@ describe('Base validation', () => {
       ORDER_CLIENT_NAME_FIELD,
       ORDER_CLIENT_PHONE_FIELD,
     ])('error if %s field is defined, but is empty', async (key) => {
-      const doc = { ...newDoc };
-      doc[key] = '';
+      newDoc[key] = '';
 
       try {
-        validate_doc_update(doc, {}, {});
+        validate_doc_update(newDoc, {}, {});
         fail();
       } catch (error) {
         expect(error).toEqual({
@@ -126,14 +133,10 @@ describe('Base validation', () => {
       ORDER_ITEM_SQUARE_FIELD,
       ORDER_ITEM_PRICE_FIELD,
     ])('error if %s item field is not defined', async (key) => {
-      const doc = {
-        ...newDoc,
-        items: [{ ...newDoc.items[0] }, { ...newDoc.items[0] }],
-      };
-      delete doc.items[0][key];
+      delete newDoc.items[0][key];
 
       try {
-        validate_doc_update(doc, {}, {});
+        validate_doc_update(newDoc, {}, {});
         fail();
       } catch (error) {
         expect(error).toEqual({
@@ -145,14 +148,10 @@ describe('Base validation', () => {
     test.each([ORDER_ITEM_COUNT_FIELD, ORDER_ITEM_PRICE_FIELD])(
       'error if %s item field is not a number',
       async (key) => {
-        const doc = {
-          ...newDoc,
-          items: [{ ...newDoc.items[0] }, { ...newDoc.items[0] }],
-        };
-        doc.items[0][key] = '1';
+        newDoc.items[0][key] = '1';
 
         try {
-          validate_doc_update(doc, {}, {});
+          validate_doc_update(newDoc, {}, {});
           fail();
         } catch (error) {
           expect(error).toEqual({
@@ -167,17 +166,105 @@ describe('Base validation', () => {
       ORDER_ITEM_PART_FIELD,
       ORDER_ITEM_SQUARE_FIELD,
     ])('error if %s item field is invalid', async (key) => {
-      const doc = {
-        ...newDoc,
-        items: [{ ...newDoc.items[0] }, { ...newDoc.items[0] }],
-      };
-      doc.items[0][key] = 'invalid value';
+      newDoc.items[0][key] = 'invalid value';
 
       try {
-        validate_doc_update(doc, {}, {});
+        validate_doc_update(newDoc, {}, {});
         fail();
       } catch (error) {
         expect(error.forbidden).toContain(`${key} should be in`);
+      }
+    });
+  });
+
+  describe('settings', () => {
+    let newDoc;
+
+    beforeEach(() => {
+      newDoc = {
+        type: 'settings',
+        [SETTINGS_PRICES_FIELD]: [
+          [
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+          ],
+          [
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+          ],
+          [
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+            [1, 2, 3, 4, 5, 6],
+          ],
+        ],
+      };
+    });
+
+    test('are valid', () => {
+      expect(validate_doc_update(newDoc, {}, {})).toBeTruthy();
+    });
+
+    test('error if invalid complexity number', () => {
+      newDoc[SETTINGS_PRICES_FIELD].length = 2;
+
+      try {
+        validate_doc_update(newDoc, {}, {});
+        fail();
+      } catch (error) {
+        expect(error).toEqual({
+          forbidden: `${newDoc[SETTINGS_PRICES_FIELD].length} should be equal ${params.complexity.length}`,
+        });
+      }
+    });
+
+    test('error if invalid class number', () => {
+      newDoc[SETTINGS_PRICES_FIELD][0].length = 5;
+
+      try {
+        validate_doc_update(newDoc, {}, {});
+        fail();
+      } catch (error) {
+        expect(error).toEqual({
+          forbidden: `${newDoc[SETTINGS_PRICES_FIELD][0].length} should be equal ${params.squares.length}`,
+        });
+      }
+    });
+
+    test('error if invalid square number', () => {
+      newDoc[SETTINGS_PRICES_FIELD][0][1].length = 5;
+
+      try {
+        validate_doc_update(newDoc, {}, {});
+        fail();
+      } catch (error) {
+        expect(error).toEqual({
+          forbidden: `${newDoc[SETTINGS_PRICES_FIELD][0][1].length} should be equal ${params.classes.length}`,
+        });
+      }
+    });
+
+    test('error if price value is not a number', () => {
+      newDoc[SETTINGS_PRICES_FIELD][0][1][2] = '1';
+
+      try {
+        validate_doc_update(newDoc, {}, {});
+        fail();
+      } catch (error) {
+        expect(error).toEqual({
+          forbidden: `${newDoc[SETTINGS_PRICES_FIELD][0][1][2]} should be a number`,
+        });
       }
     });
   });

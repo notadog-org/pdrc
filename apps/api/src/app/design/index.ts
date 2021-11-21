@@ -1,5 +1,66 @@
+export const params = {
+  complexity: ['light', 'complicated', 'hailstorm'],
+  classes: [
+    {
+      title: 'A',
+      length: { from: 0, till: 3.8 },
+      width: { from: 0, till: 1.6 },
+    },
+    {
+      title: 'B',
+      length: { from: 3.8, till: 4.4 },
+      width: { from: 1.5, till: 1.7 },
+    },
+    {
+      title: 'C',
+      length: { from: 4.2, till: 4.6 },
+      width: { from: 1.6, till: 1.75 },
+    },
+    {
+      title: 'D',
+      length: { from: 4.6, till: 4.8 },
+      width: { from: 1.7, till: 1.8 },
+    },
+    {
+      title: 'E',
+      length: { from: 4.8, till: 5 },
+      width: { from: 1.8 },
+    },
+    {
+      title: 'F',
+      length: { from: 5 },
+      width: { from: 1.8 },
+    },
+  ],
+  squares: [
+    { value: '1-3' },
+    { value: '3-5' },
+    { value: '5-10' },
+    { value: '10-20' },
+    { value: '20-40' },
+    { value: '40-70' },
+  ],
+  parts: [
+    { value: 'doorFrontLeft' },
+    { value: 'doorFrontRight' },
+    { value: 'doorBackLeft' },
+    { value: 'doorBackRight' },
+    { value: 'wingFrontLeft' },
+    { value: 'wingFrontRight' },
+    { value: 'wingBackLeft' },
+    { value: 'wingBackRight' },
+    { value: 'rackLeftRack' },
+    { value: 'rackRightRack' },
+    { value: 'hood' },
+    { value: 'trunk' },
+    { value: 'roof' },
+  ],
+};
+
 export const validate_doc_update = function (newDoc, oldDoc, userCtx) {
   // fields
+  const SETTINGS_PRICES_FIELD = 'prices';
+
   const ORDER_CAR_CLASS_FIELD = 'carClass';
   const ORDER_DATE_FIELD = 'date';
   const ORDER_ITEMS_FIELD = 'items';
@@ -78,6 +139,11 @@ export const validate_doc_update = function (newDoc, oldDoc, userCtx) {
     if (!values.includes(doc[field])) throw { forbidden: message };
   }
 
+  function isEqual(actual, expected, message?) {
+    message = message || actual + ' should be equal ' + expected;
+    if (actual !== expected) throw { forbidden: message };
+  }
+
   // process
 
   if (newDoc._id === '_design/base') {
@@ -142,6 +208,37 @@ export const validate_doc_update = function (newDoc, oldDoc, userCtx) {
     return true;
   }
 
+  if (newDoc.type === 'settings') {
+    [SETTINGS_PRICES_FIELD].forEach(function (field) {
+      isRequired(newDoc, field);
+    });
+
+    [SETTINGS_PRICES_FIELD].forEach(function (field) {
+      isArray(newDoc, field);
+    });
+
+    isEqual(
+      newDoc[SETTINGS_PRICES_FIELD].length,
+      COMPLEXITY_VALID_VALUES.length
+    );
+
+    newDoc[SETTINGS_PRICES_FIELD].forEach(function (complexityItem, i1) {
+      isArray(newDoc[SETTINGS_PRICES_FIELD], i1);
+      isEqual(complexityItem.length, SQUARES_VALID_VALUES.length);
+
+      complexityItem.forEach(function (squareItem, i2) {
+        isArray(complexityItem, i2);
+        isEqual(squareItem.length, CAR_CLASSES_VALID_VALUES.length);
+
+        squareItem.forEach(function (_, i3) {
+          isNumber(squareItem, i3, squareItem[i3] + ' should be a number');
+        });
+      });
+    });
+
+    return true;
+  }
+
   throw { forbidden: 'Unknown data' };
 };
 
@@ -149,62 +246,35 @@ export const validation = {
   _id: '_design/base',
   validate_doc_update: validate_doc_update.toString(),
   language: 'javascript',
-  params: {
-    categories: ['light', 'complicated', 'hailstorm'],
-    classes: [
-      {
-        title: 'A',
-        length: { from: 0, till: 3.8 },
-        width: { from: 0, till: 1.6 },
-      },
-      {
-        title: 'B',
-        length: { from: 3.8, till: 4.4 },
-        width: { from: 1.5, till: 1.7 },
-      },
-      {
-        title: 'C',
-        length: { from: 4.2, till: 4.6 },
-        width: { from: 1.6, till: 1.75 },
-      },
-      {
-        title: 'D',
-        length: { from: 4.6, till: 4.8 },
-        width: { from: 1.7, till: 1.8 },
-      },
-      {
-        title: 'E',
-        length: { from: 4.8, till: 5 },
-        width: { from: 1.8 },
-      },
-      {
-        title: 'F',
-        length: { from: 5 },
-        width: { from: 1.8 },
-      },
+  params: JSON.stringify(params),
+};
+
+export const defaultSettings = {
+  type: 'settings',
+  prices: [
+    [
+      [500, 1500, 2500, 4000, 5000, 6000],
+      [1500, 2000, 3000, 4500, 5500, 7000],
+      [2000, 2500, 3500, 5000, 6000, 7500],
+      [2500, 3000, 4000, 5500, 6500, 8000],
+      [2500, 3000, 4000, 5500, 6500, 8000],
+      [2500, 3000, 4000, 5500, 6500, 8000],
     ],
-    squares: [
-      { value: '1-3' },
-      { value: '3-5' },
-      { value: '5-10' },
-      { value: '10-20' },
-      { value: '20-40' },
-      { value: '40-70' },
+    [
+      [1500, 2500, 4000, 5200, 6500, 8450],
+      [3500, 3000, 4500, 5850, 7150, 9100],
+      [3000, 4500, 5500, 6500, 7850, 9750],
+      [4000, 4500, 6000, 7150, 8450, 10400],
+      [4000, 4500, 6000, 7150, 8450, 10400],
+      [4000, 4500, 6000, 7150, 8450, 10400],
     ],
-    parts: [
-      { value: 'doorFrontLeft' },
-      { value: 'doorFrontRight' },
-      { value: 'doorBackLeft' },
-      { value: 'doorBackRight' },
-      { value: 'wingFrontLeft' },
-      { value: 'wingFrontRight' },
-      { value: 'wingBackLeft' },
-      { value: 'wingBackRight' },
-      { value: 'rackLeftRack' },
-      { value: 'rackRightRack' },
-      { value: 'hood' },
-      { value: 'trunk' },
-      { value: 'roof' },
+    [
+      [2000, 3500, 5500, 8000, 10000, 11000],
+      [3500, 4000, 6000, 9000, 11000, 12000],
+      [4000, 5500, 7000, 10000, 12000, 13000],
+      [5000, 6000, 8000, 11000, 13000, 14000],
+      [5000, 6000, 8000, 11000, 13000, 14000],
+      [5000, 6000, 8000, 11000, 13000, 14000],
     ],
-  },
+  ],
 };
