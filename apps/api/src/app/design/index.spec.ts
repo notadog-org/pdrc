@@ -2,7 +2,7 @@ import { fail } from 'assert';
 import { validate_doc_update } from './index';
 
 // fields
-const ORDER_CATEGORY_FIELD = 'category';
+const ORDER_CAR_CLASS_FIELD = 'carClass';
 const ORDER_DATE_FIELD = 'date';
 const ORDER_ITEMS_FIELD = 'items';
 
@@ -11,38 +11,35 @@ const ORDER_CAR_PRODUCER_FIELD = 'carProducer';
 const ORDER_CLIENT_NAME_FIELD = 'clientName';
 const ORDER_CLIENT_PHONE_FIELD = 'clientPhone';
 
-const ORDER_ITEM_CAR_CLASS_FIELD = 'carClass';
+const ORDER_ITEM_COMPLEXITY_FIELD = 'complexity';
 const ORDER_ITEM_COUNT_FIELD = 'count';
 const ORDER_ITEM_PART_FIELD = 'part';
-const ORDER_ITEM_SIZE_FIELD = 'size';
-const ORDER_ITEM_TABLE_FIELD = 'table';
+const ORDER_ITEM_SQUARE_FIELD = 'square';
 const ORDER_ITEM_PRICE_FIELD = 'price';
 
 describe('Base validation', () => {
   describe('order', () => {
     const newDoc = {
       type: 'order',
+      carClass: 'C',
       carModel: 'A5',
       carProducer: 'Audi',
-      category: 1,
       clientName: 'Ivan',
       clientPhone: '89998887766',
       date: new Date(),
       items: [
         {
-          carClass: 'A',
+          complexity: 'light',
           count: 1,
-          part: 'right door',
-          size: '1-2',
-          table: 'Complicated',
+          part: 'doorFrontLeft',
+          square: '1-3',
           price: 200,
         },
         {
-          carClass: 'A',
+          complexity: 'complicated',
           count: 1,
-          part: 'right door',
-          size: '1-2',
-          table: 'Simple',
+          part: 'trunk',
+          square: '5-10',
           price: 200,
         },
       ],
@@ -52,7 +49,7 @@ describe('Base validation', () => {
       expect(validate_doc_update(newDoc, {}, {})).toBeTruthy();
     });
 
-    test.each([ORDER_CATEGORY_FIELD, ORDER_DATE_FIELD, ORDER_ITEMS_FIELD])(
+    test.each([ORDER_CAR_CLASS_FIELD, ORDER_DATE_FIELD, ORDER_ITEMS_FIELD])(
       'error if %s field is not defined',
       async (key) => {
         const doc = { ...newDoc };
@@ -123,11 +120,10 @@ describe('Base validation', () => {
     });
 
     test.each([
-      ORDER_ITEM_CAR_CLASS_FIELD,
+      ORDER_ITEM_COMPLEXITY_FIELD,
       ORDER_ITEM_COUNT_FIELD,
       ORDER_ITEM_PART_FIELD,
-      ORDER_ITEM_SIZE_FIELD,
-      ORDER_ITEM_TABLE_FIELD,
+      ORDER_ITEM_SQUARE_FIELD,
       ORDER_ITEM_PRICE_FIELD,
     ])('error if %s item field is not defined', async (key) => {
       const doc = {
@@ -165,5 +161,24 @@ describe('Base validation', () => {
         }
       }
     );
+
+    test.each([
+      ORDER_ITEM_COMPLEXITY_FIELD,
+      ORDER_ITEM_PART_FIELD,
+      ORDER_ITEM_SQUARE_FIELD,
+    ])('error if %s item field is invalid', async (key) => {
+      const doc = {
+        ...newDoc,
+        items: [{ ...newDoc.items[0] }, { ...newDoc.items[0] }],
+      };
+      doc.items[0][key] = 'invalid value';
+
+      try {
+        validate_doc_update(doc, {}, {});
+        fail();
+      } catch (error) {
+        expect(error.forbidden).toContain(`${key} should be in`);
+      }
+    });
   });
 });
