@@ -6,6 +6,7 @@ import { JWT_TOKEN_KEY } from '../const';
 import { Order } from './types';
 import { DatabaseService } from './services/database';
 import { Subject } from 'rxjs';
+import { SettingsService } from './services/settings';
 
 @Component({
   selector: 'pdrc-offline-first-root',
@@ -17,11 +18,13 @@ export class AppComponent {
 
   userModel = { username: 'user1', password: 'user1' };
   orders$ = this.orderService.getOrders();
+  settings$ = this.settingsService.getSettings();
 
   constructor(
     private readonly database: DatabaseService,
     private readonly authService: AuthService,
-    private readonly orderService: OrderService
+    private readonly orderService: OrderService,
+    private readonly settingsService: SettingsService
   ) {}
 
   register() {

@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 import { DatabaseService } from './services/database';
 import { OrderService } from './services/orders';
 import { AuthService } from './services/auth';
+import { SettingsService } from './services/settings';
 
 @NgModule({
   declarations: [AppComponent],
@@ -17,7 +18,7 @@ import { AuthService } from './services/auth';
     HttpClientModule,
     FormsModule,
   ],
-  providers: [OrderService, AuthService, DatabaseService],
+  providers: [SettingsService, OrderService, AuthService, DatabaseService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
