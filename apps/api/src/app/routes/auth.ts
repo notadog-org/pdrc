@@ -4,7 +4,7 @@ import axios from 'axios';
 
 import { environment } from '../../environments/environment';
 import { hexEncode, signJwt, sleep } from '../utils';
-import { validation } from '../design';
+import { validation, defaultSettings } from '../design';
 
 export const router = express.Router();
 
@@ -29,15 +29,22 @@ router.post('/api/auth/register', async (req, res, next) => {
     //TODO(klikkn): refactor
     //it allows couch db to create a user db
     await sleep(500);
+    const token = signJwt({ username });
 
     await axios.put(
-      `${environment.couchDbRootHost}/userdb-${hexEncode(username)}/${
+      `${environment.couchDbUrl}/userdb-${hexEncode(username)}/${
         validation._id
       }`,
-      JSON.stringify(validation)
+      JSON.stringify(validation),
+      { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    const token = signJwt({ username });
+    await axios.put(
+      `${environment.couchDbUrl}/userdb-${hexEncode(username)}/settings`,
+      defaultSettings,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
     res.json({ token: `Bearer ${token}`, ...data });
   } catch (err) {
     next(err);
