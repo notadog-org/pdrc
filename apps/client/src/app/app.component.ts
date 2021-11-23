@@ -47,7 +47,7 @@ export class AppComponent {
   }
 
   logout() {
-    this.authService.logout().subscribe(() => this.database.invalidate());
+    this.authService.logout().subscribe(() => this.database.destroy());
   }
 
   createOrder() {
