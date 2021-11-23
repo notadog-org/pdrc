@@ -14,20 +14,6 @@ const toUserDbUrl = (url, username) =>
     ''
   )}`;
 
-router.post('/api/sync/*', bodyParser.json(), async (req, res, next) => {
-  try {
-    const { sub } = verifyJwt(req.headers.authorization);
-    const url = toUserDbUrl(req.url, sub);
-    const { data } = await axios.post(url, req.body, {
-      headers: req.headers,
-    } as any);
-
-    res.send(data);
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.all('/api/sync/*', async (req, res, next) => {
   try {
     const { sub } = verifyJwt(req.headers.authorization);
