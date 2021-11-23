@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from './services/auth';
 import { OrderService } from './services/orders';
-import { switchMap, takeUntil, tap } from 'rxjs/operators';
-import { JWT_TOKEN_KEY } from '../const';
+import { takeUntil, tap } from 'rxjs/operators';
 import { Order } from './types';
 import { DatabaseService } from './services/database';
 import { Subject } from 'rxjs';
@@ -32,7 +31,6 @@ export class AppComponent {
       .register({ ...this.userModel })
       .pipe(
         takeUntil(this.destroy$),
-        tap(({ token }) => localStorage.setItem(JWT_TOKEN_KEY, token)),
         tap(() => this.database.invalidate())
       )
       .subscribe();
@@ -43,7 +41,6 @@ export class AppComponent {
       .login({ ...this.userModel })
       .pipe(
         takeUntil(this.destroy$),
-        tap(({ token }) => localStorage.setItem(JWT_TOKEN_KEY, token)),
         tap(() => this.database.invalidate())
       )
       .subscribe();
