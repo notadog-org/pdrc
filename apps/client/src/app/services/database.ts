@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import PouchDB from 'pouchdb';
 import * as PouchValidation from 'pouchdb-validation-lib';
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { BehaviorSubject, defer, Observable } from 'rxjs';
 import { withLatestFrom } from 'rxjs/operators';
 
 import { JWT_TOKEN_KEY } from '../../const';
@@ -62,7 +62,7 @@ export class DatabaseService {
       .then(() => {
         this.data$.next([]);
       })
-      .catch((err: any) => {
+      .catch(() => {
         this.data$.next([]);
       });
   }
@@ -72,15 +72,15 @@ export class DatabaseService {
   }
 
   createOne(value: Omit<Doc, '_id' | '_rev'>): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.validatingPost(value));
+    return defer<Promise<Doc>>(() => this.db.validatingPost(value));
   }
 
   updateOne(value: Doc): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.validatingPut(value));
+    return defer<Promise<Doc>>(() => this.db.validatingPut(value));
   }
 
   deleteOne(value: Doc): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.validatingRemove(value));
+    return defer<Promise<Doc>>(() => this.db.validatingRemove(value));
   }
 
   private init() {

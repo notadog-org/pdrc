@@ -51,20 +51,19 @@ export class AppComponent {
   }
 
   createOrder() {
-    this.orderService.createOrder({
-      title: 'order1' + new Date().toString(),
-    });
+    this.orderService
+      .createOrder({ title: 'order1' + new Date().toString() })
+      .subscribe();
   }
 
   updateOrder(order: Order) {
-    this.orderService.updateOrder({
-      ...order,
-      title: order.title + ' updated',
-    });
+    this.orderService
+      .updateOrder({ ...order, title: order.title + ' updated' })
+      .subscribe();
   }
 
   deleteOrder(order: Order) {
-    this.orderService.deleteOrder(order);
+    this.orderService.deleteOrder(order).subscribe();
   }
 
   invalidate() {
