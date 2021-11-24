@@ -9,6 +9,8 @@
     "test": "nx test",
     "affected:build": "nx affected:build --with-deps",
     "affected:test": "nx affected:test",
+    "affected:lint": "nx affected:lint",
+    "format:write": "prettier --write",
     "postinstall": "ngcc --properties es2015 browser module main",
     "heroku-postbuild": "nx build --prod && nx build --prod client",
     "prepare": "husky install"
@@ -74,7 +76,10 @@
     "typescript": "~4.3.5"
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix",
-    "*.{js,css,md}": "prettier --write"
+    "{apps,libs}/**/*.{js,ts,json,md,scss,html}": [
+      "npm run affected:lint  -- --uncommitted --parallel -- --fix",
+      "npm run format:write -- --uncommitted",
+      "git add"
+    ]
   }
 }
