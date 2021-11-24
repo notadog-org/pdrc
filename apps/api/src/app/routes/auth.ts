@@ -32,16 +32,16 @@ router.post('/api/auth/register', async (req, res, next) => {
     const token = signJwt({ username });
 
     await axios.put(
-      `${environment.couchDbUrl}/userdb-${hexEncode(username)}/${
-        validation._id
-      }`,
-      JSON.stringify(validation),
+      `${environment.couchDbUrl}/userdb-${hexEncode(username)}/settings`,
+      defaultSettings,
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
     await axios.put(
-      `${environment.couchDbUrl}/userdb-${hexEncode(username)}/settings`,
-      defaultSettings,
+      `${environment.couchDbUrl}/userdb-${hexEncode(username)}/${
+        validation._id
+      }`,
+      JSON.stringify(validation),
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
