@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { AuthService } from './services/auth';
 import { OrderService } from './services/orders';
-import { switchMap, takeUntil, tap } from 'rxjs/operators';
-import { JWT_TOKEN_KEY } from '../const';
+import { takeUntil, tap } from 'rxjs/operators';
 import { Order } from './types';
 import { DatabaseService } from './services/database';
 import { Subject } from 'rxjs';
+import { SettingsService } from './services/settings';
 
 @Component({
   selector: 'pdrc-offline-first-root',
@@ -17,11 +17,13 @@ export class AppComponent {
 
   userModel = { username: 'user1', password: 'user1' };
   orders$ = this.orderService.getOrders();
+  settings$ = this.settingsService.getSettings();
 
   constructor(
     private readonly database: DatabaseService,
     private readonly authService: AuthService,
-    private readonly orderService: OrderService
+    private readonly orderService: OrderService,
+    private readonly settingsService: SettingsService
   ) {}
 
   register() {
@@ -29,7 +31,6 @@ export class AppComponent {
       .register({ ...this.userModel })
       .pipe(
         takeUntil(this.destroy$),
-        tap(({ token }) => localStorage.setItem(JWT_TOKEN_KEY, token)),
         tap(() => this.database.invalidate())
       )
       .subscribe();
@@ -40,31 +41,29 @@ export class AppComponent {
       .login({ ...this.userModel })
       .pipe(
         takeUntil(this.destroy$),
-        tap(({ token }) => localStorage.setItem(JWT_TOKEN_KEY, token)),
         tap(() => this.database.invalidate())
       )
       .subscribe();
   }
 
   logout() {
-    this.authService.logout().subscribe(() => this.database.invalidate());
+    this.authService.logout().subscribe(() => this.database.destroy());
   }
 
   createOrder() {
-    this.orderService.createOrder({
-      title: 'order1' + new Date().toString(),
-    });
+    this.orderService
+      .createOrder({ title: 'order1' + new Date().toString() })
+      .subscribe();
   }
 
   updateOrder(order: Order) {
-    this.orderService.updateOrder({
-      ...order,
-      title: order.title + ' updated',
-    });
+    this.orderService
+      .updateOrder({ ...order, title: order.title + ' updated' })
+      .subscribe();
   }
 
   deleteOrder(order: Order) {
-    this.orderService.deleteOrder(order);
+    this.orderService.deleteOrder(order).subscribe();
   }
 
   invalidate() {

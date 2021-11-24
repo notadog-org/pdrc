@@ -7,10 +7,14 @@
     "serve": "nx serve",
     "build": "nx build",
     "test": "nx test",
+    "lint": "nx lint",
     "affected:build": "nx affected:build --with-deps",
     "affected:test": "nx affected:test",
+    "affected:lint": "nx affected:lint",
+    "format:write": "prettier --write",
     "postinstall": "ngcc --properties es2015 browser module main",
-    "heroku-postbuild": "nx build --prod && nx build --prod client"
+    "heroku-postbuild": "nx build --prod && nx build --prod client",
+    "prepare": "husky install"
   },
   "private": true,
   "dependencies": {
@@ -30,6 +34,7 @@
     "jsonwebtoken": "^8.5.1",
     "nano": "^9.0.5",
     "pouchdb": "^7.2.2",
+    "pouchdb-validation-lib": "^1.2.2",
     "request": "^2.88.2",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
@@ -63,10 +68,18 @@
     "eslint": "7.32.0",
     "eslint-config-prettier": "8.1.0",
     "eslint-plugin-cypress": "^2.10.3",
+    "husky": "^7.0.4",
     "jest": "27.2.3",
     "jest-preset-angular": "10.0.1",
+    "lint-staged": "^12.1.2",
     "prettier": "^2.3.1",
     "ts-jest": "27.0.5",
     "typescript": "~4.3.5"
+  },
+  "lint-staged": {
+    "{apps,libs}/**/*.{js,ts,json,md,scss,html}": [
+      "npm run affected:lint  -- --uncommitted --parallel -- --fix=true",
+      "npm run format:write"
+    ]
   }
 }

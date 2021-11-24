@@ -45,3 +45,14 @@ export class Order extends Doc {
     this.title = title ?? 'Empty title';
   }
 }
+
+export class Settings extends Doc {
+  prices: string;
+
+  constructor(data: any) {
+    super(data);
+
+    const { prices } = data;
+    this.prices = prices ?? [];
+  }
+}

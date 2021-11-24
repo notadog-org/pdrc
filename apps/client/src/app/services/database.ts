@@ -1,16 +1,15 @@
 import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import PouchDB from 'pouchdb';
-import { BehaviorSubject, from, Observable, Subject } from 'rxjs';
-import { map, takeUntil, withLatestFrom } from 'rxjs/operators';
+import * as PouchValidation from 'pouchdb-validation-lib';
+import { BehaviorSubject, defer, Observable } from 'rxjs';
+import { withLatestFrom } from 'rxjs/operators';
 
 import { JWT_TOKEN_KEY } from '../../const';
 import { Change, Doc } from '../types';
 
 @Injectable()
 export class DatabaseService {
-  private destroy$ = new Subject();
-
   private syncUrl = `${this.document.location.protocol}//${this.document.location.host}/api/sync`;
   private db: any;
   private change$ = new BehaviorSubject<Change | null>(null);
@@ -18,42 +17,10 @@ export class DatabaseService {
   data$ = new BehaviorSubject<Doc[] | null>(null);
 
   constructor(@Inject(DOCUMENT) private readonly document: Document) {
-    this.init();
-  }
-
-  invalidate() {
-    this.destroy();
-    this.init();
-  }
-
-  getAll(): Observable<Doc[] | null> {
-    return this.data$.asObservable();
-  }
-
-  createOne(value: Omit<Doc, '_id' | '_rev'>): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.post(value));
-  }
-
-  updateOne(value: Doc): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.put(value));
-  }
-
-  deleteOne(value: Doc): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.remove(value));
-  }
-
-  destroy() {
-    this.destroy$.next();
-    this.data$.next([]);
-    this.db.destroy();
-  }
-
-  private init() {
-    this.db = new PouchDB(`pdrc-${new Date().toString()}`);
-    this.sync();
+    PouchDB.plugin(PouchValidation);
 
     this.change$
-      .pipe(takeUntil(this.destroy$), withLatestFrom(this.data$))
+      .pipe(withLatestFrom(this.data$))
       .subscribe(([change, data]) => {
         if (!change || !data) {
           console.log('Change or data is missed');
@@ -80,45 +47,88 @@ export class DatabaseService {
         this.data$.next(data);
       });
 
-    from<Promise<Doc[]>>(this.db.allDocs({ include_docs: true }))
-      .pipe(
-        takeUntil(this.destroy$),
-        map((result: any) => result.rows.map(({ doc }: { doc: Doc }) => doc))
-      )
-      .subscribe(
-        (data) => {
-          this.data$.next(data);
-          this.db
-            .changes({ live: true, since: 'now', include_docs: true })
-            .on('change', (change: Change) => this.change$.next(change));
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
+    this.init();
   }
 
-  private sync() {
+  invalidate() {
+    return this.destroy().then(() => {
+      this.init();
+    });
+  }
+
+  destroy() {
+    return this.db
+      .destroy()
+      .then(() => {
+        this.data$.next([]);
+      })
+      .catch(() => {
+        this.data$.next([]);
+      });
+  }
+
+  getAll(): Observable<Doc[] | null> {
+    return this.data$.asObservable();
+  }
+
+  createOne(value: Omit<Doc, '_id' | '_rev'>): Observable<Doc> {
+    return defer<Promise<Doc>>(() => this.db.validatingPost(value));
+  }
+
+  updateOne(value: Doc): Observable<Doc> {
+    return defer<Promise<Doc>>(() => this.db.validatingPut(value));
+  }
+
+  deleteOne(value: Doc): Observable<Doc> {
+    return defer<Promise<Doc>>(() => this.db.validatingRemove(value));
+  }
+
+  private init() {
     const token = localStorage.getItem(JWT_TOKEN_KEY);
+    const opts = {
+      headers: { Authorization: token },
+    };
+
+    this.db = new PouchDB('pdrc');
+    this.db.replicate
+      .from(this.syncUrl, opts)
+      .on('complete', () => {
+        this.db
+          .sync(this.syncUrl, {
+            ...opts,
+            live: true,
+            retry: true,
+            continuous: true,
+            back_off_function: (delay: number) => {
+              if (delay === 0) {
+                return 1000;
+              }
+              return delay * 3;
+            },
+          })
+          .on('denied', ({ doc }: { doc: Change }) => {
+            if (!doc.error) {
+              return;
+            }
+            this.invalidate();
+          });
+      })
+      .on('error', (err: any) => {
+        console.log(err);
+        this.destroy();
+      });
 
     this.db
-      .sync(this.syncUrl, {
-        headers: { Authorization: token },
-        live: true,
-        retry: true,
-        continuous: true,
-        back_off_function: (delay: number) => {
-          if (delay === 0) {
-            return 1000;
-          }
-          return delay * 3;
-        },
+      .allDocs({ include_docs: true })
+      .then((result: any) => {
+        const data = result.rows.map(({ doc }: { doc: Doc }) => doc);
+        this.data$.next(data);
+        this.db
+          .changes({ live: true, since: 'now', include_docs: true })
+          .on('change', (change: Change) => this.change$.next(change));
       })
-      .on('denied', ({ doc }: { doc: Change }) => {
-        if (!doc.error) {
-          return;
-        }
-        this.invalidate();
+      .catch((err: any) => {
+        console.log(err);
       });
   }
 }

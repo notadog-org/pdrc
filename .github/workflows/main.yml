@@ -15,13 +15,16 @@ jobs:
       - name: Install dependencies
         run: npm i
 
-      # - name: Lint
-      #   run: npm run lint
+      - name: lint:api
+        run: npm run lint
 
-      - name: Test Api
+      - name: test:api
         run: npm run test
 
-      - name: Test Client
+      - name: lint:client
+        run: npm run lint client
+
+      - name: test:client
         run: npm run test client
 
       # - name: E2E
