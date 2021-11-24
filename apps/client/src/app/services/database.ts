@@ -8,8 +8,6 @@ import { withLatestFrom } from 'rxjs/operators';
 import { JWT_TOKEN_KEY } from '../../const';
 import { Change, Doc } from '../types';
 
-PouchDB.plugin(PouchValidation);
-
 @Injectable()
 export class DatabaseService {
   private syncUrl = `${this.document.location.protocol}//${this.document.location.host}/api/sync`;
@@ -19,6 +17,8 @@ export class DatabaseService {
   data$ = new BehaviorSubject<Doc[] | null>(null);
 
   constructor(@Inject(DOCUMENT) private readonly document: Document) {
+    PouchDB.plugin(PouchValidation);
+
     this.change$
       .pipe(withLatestFrom(this.data$))
       .subscribe(([change, data]) => {
