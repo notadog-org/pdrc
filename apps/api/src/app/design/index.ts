@@ -208,6 +208,14 @@ export const validate_doc_update = function (newDoc, oldDoc, userCtx) {
     return true;
   }
 
+  if (newDoc.type === 'settings' && !oldDoc) {
+    throw { forbidden: 'You cannot create new settings' };
+  }
+
+  if (newDoc.type === 'settings' && newDoc.deleted) {
+    throw { forbidden: 'You cannot delete settings' };
+  }
+
   if (newDoc.type === 'settings') {
     [SETTINGS_PRICES_FIELD].forEach(function (field) {
       isRequired(newDoc, field);

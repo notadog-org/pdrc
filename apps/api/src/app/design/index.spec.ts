@@ -57,7 +57,7 @@ describe('Base validation', () => {
     });
 
     test('is valid', () => {
-      expect(validate_doc_update(newDoc, {}, {})).toBeTruthy();
+      expect(validate_doc_update(newDoc, null, null)).toBeTruthy();
     });
 
     test.each([ORDER_CAR_CLASS_FIELD, ORDER_DATE_FIELD, ORDER_ITEMS_FIELD])(
@@ -66,7 +66,7 @@ describe('Base validation', () => {
         delete newDoc[key];
 
         try {
-          validate_doc_update(newDoc, {}, {});
+          validate_doc_update(newDoc, null, null);
           fail();
         } catch (error) {
           expect(error).toEqual({
@@ -82,7 +82,7 @@ describe('Base validation', () => {
         newDoc[key] = 1;
 
         try {
-          validate_doc_update(newDoc, {}, {});
+          validate_doc_update(newDoc, null, null);
           fail();
         } catch (error) {
           expect(error).toEqual({
@@ -98,7 +98,7 @@ describe('Base validation', () => {
         newDoc[key] = 1;
 
         try {
-          validate_doc_update(newDoc, {}, {});
+          validate_doc_update(newDoc, null, null);
           fail();
         } catch (error) {
           expect(error).toEqual({
@@ -117,7 +117,7 @@ describe('Base validation', () => {
       newDoc[key] = '';
 
       try {
-        validate_doc_update(newDoc, {}, {});
+        validate_doc_update(newDoc, null, null);
         fail();
       } catch (error) {
         expect(error).toEqual({
@@ -136,7 +136,7 @@ describe('Base validation', () => {
       delete newDoc.items[0][key];
 
       try {
-        validate_doc_update(newDoc, {}, {});
+        validate_doc_update(newDoc, null, null);
         fail();
       } catch (error) {
         expect(error).toEqual({
@@ -151,7 +151,7 @@ describe('Base validation', () => {
         newDoc.items[0][key] = '1';
 
         try {
-          validate_doc_update(newDoc, {}, {});
+          validate_doc_update(newDoc, null, null);
           fail();
         } catch (error) {
           expect(error).toEqual({
@@ -169,7 +169,7 @@ describe('Base validation', () => {
       newDoc.items[0][key] = 'invalid value';
 
       try {
-        validate_doc_update(newDoc, {}, {});
+        validate_doc_update(newDoc, null, null);
         fail();
       } catch (error) {
         expect(error.forbidden).toContain(`${key} should be in`);
@@ -213,14 +213,38 @@ describe('Base validation', () => {
     });
 
     test('are valid', () => {
-      expect(validate_doc_update(newDoc, {}, {})).toBeTruthy();
+      expect(validate_doc_update(newDoc, {}, null)).toBeTruthy();
+    });
+
+    test('error if create new', () => {
+      try {
+        validate_doc_update(newDoc, null, null);
+        fail();
+      } catch (error) {
+        expect(error).toEqual({
+          forbidden: 'You cannot create new settings',
+        });
+      }
+    });
+
+    test('error if delete', () => {
+      newDoc.deleted = true;
+
+      try {
+        validate_doc_update(newDoc, {}, null);
+        fail();
+      } catch (error) {
+        expect(error).toEqual({
+          forbidden: 'You cannot delete settings',
+        });
+      }
     });
 
     test('error if invalid complexity number', () => {
       newDoc[SETTINGS_PRICES_FIELD].length = 2;
 
       try {
-        validate_doc_update(newDoc, {}, {});
+        validate_doc_update(newDoc, {}, null);
         fail();
       } catch (error) {
         expect(error).toEqual({
@@ -233,7 +257,7 @@ describe('Base validation', () => {
       newDoc[SETTINGS_PRICES_FIELD][0].length = 5;
 
       try {
-        validate_doc_update(newDoc, {}, {});
+        validate_doc_update(newDoc, {}, null);
         fail();
       } catch (error) {
         expect(error).toEqual({
@@ -246,7 +270,7 @@ describe('Base validation', () => {
       newDoc[SETTINGS_PRICES_FIELD][0][1].length = 5;
 
       try {
-        validate_doc_update(newDoc, {}, {});
+        validate_doc_update(newDoc, {}, null);
         fail();
       } catch (error) {
         expect(error).toEqual({
@@ -259,7 +283,7 @@ describe('Base validation', () => {
       newDoc[SETTINGS_PRICES_FIELD][0][1][2] = '1';
 
       try {
-        validate_doc_update(newDoc, {}, {});
+        validate_doc_update(newDoc, {}, null);
         fail();
       } catch (error) {
         expect(error).toEqual({

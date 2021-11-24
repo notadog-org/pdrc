@@ -25,7 +25,7 @@ export class SettingsService {
     );
   }
 
-  updateOrder(settings: Settings) {
+  updateSettings(settings: Settings) {
     return this.database.updateOne(settings);
   }
 }
