@@ -1,11 +1,14 @@
 import { Inject, Injectable } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import PouchDB from 'pouchdb';
+import * as PouchValidation from 'pouchdb-validation-lib';
 import { BehaviorSubject, from, Observable } from 'rxjs';
 import { withLatestFrom } from 'rxjs/operators';
 
 import { JWT_TOKEN_KEY } from '../../const';
 import { Change, Doc } from '../types';
+
+PouchDB.plugin(PouchValidation);
 
 @Injectable()
 export class DatabaseService {
@@ -69,15 +72,15 @@ export class DatabaseService {
   }
 
   createOne(value: Omit<Doc, '_id' | '_rev'>): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.post(value));
+    return from<Promise<Doc>>(this.db.validatingPost(value));
   }
 
   updateOne(value: Doc): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.put(value));
+    return from<Promise<Doc>>(this.db.validatingPut(value));
   }
 
   deleteOne(value: Doc): Observable<Doc> {
-    return from<Promise<Doc>>(this.db.remove(value));
+    return from<Promise<Doc>>(this.db.validatingRemove(value));
   }
 
   private init() {
