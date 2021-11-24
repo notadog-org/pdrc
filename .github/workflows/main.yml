@@ -21,6 +21,9 @@ jobs:
       - name: test:api
         run: npm run test
 
+      - name: build:api
+        run: npm run build api
+
       - name: lint:client
         run: npm run lint client
 
@@ -29,3 +32,6 @@ jobs:
 
       # - name: E2E
       #   run: npm run e2e
+
+      - name: build:client
+        run: npm run build client
