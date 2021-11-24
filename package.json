@@ -7,6 +7,7 @@
     "serve": "nx serve",
     "build": "nx build",
     "test": "nx test",
+    "lint": "nx lint",
     "affected:build": "nx affected:build --with-deps",
     "affected:test": "nx affected:test",
     "affected:lint": "nx affected:lint",
@@ -77,9 +78,8 @@
   },
   "lint-staged": {
     "{apps,libs}/**/*.{js,ts,json,md,scss,html}": [
-      "npm run affected:lint  -- --uncommitted --parallel -- --fix",
-      "npm run format:write -- --uncommitted",
-      "git add"
+      "npm run affected:lint  -- --uncommitted --parallel -- --fix=true",
+      "npm run format:write"
     ]
   }
 }
