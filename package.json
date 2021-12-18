@@ -14,7 +14,8 @@
     "format:write": "prettier --write",
     "postinstall": "ngcc --properties es2015 browser module main",
     "heroku-postbuild": "nx build --prod && nx build --prod client",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "db": "docker compose up -d"
   },
   "private": true,
   "dependencies": {
